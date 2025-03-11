@@ -2,8 +2,11 @@ import pancake_problem
 
 from pancake_problem import PancakeProblem
 from queue import PriorityQueue
-from search import Search, SearchNode, WeightedAStarSearchNode
+from search import Search, SearchNode
 
+class WeightedAStarSearchNode(SearchNode):
+  def __lt__(self, other):
+    return self.g < other.g
 
 class WeightedAStarSearch(Search):
   name = "weighted-astar"

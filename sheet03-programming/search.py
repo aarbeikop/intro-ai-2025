@@ -8,10 +8,6 @@ class SearchNode:
     self.parent = parent
     self.g = g
 
-class WeightedAStarSearchNode(SearchNode):
-  def __lt__(self, other):
-    return self.g < other.g
-
 class Search:
   def __init__(self, search_problem, print_statistics=False,
                time_limit=None):
