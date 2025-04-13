@@ -27,7 +27,21 @@ def compute_q_value(inst, s, action, values):
     # TODO: add your code here.
     # The goal state has Q-value of 0.
     # Return a float.
-    raise NotImplementedError
+    if s == inst.goal:
+        return 0.0
+    
+    # Get reward for the current state
+    reward = inst.rewards[s]
+    
+    # Get successors and their probabilities
+    successors = inst.get_successors(s, action)
+    
+    # Q(s,a) = R(s) + γ * Σ P(s'|s,a) * V(s')
+    q_value = reward  # immediate reward
+    for next_state, prob in successors:
+        q_value += 0.9 * prob * values[next_state]  # γ=0.9 as specified
+        
+    return q_value
 
 
 """
@@ -44,7 +58,17 @@ def compute_greedy_action_and_q_value(inst, s, values):
     # TODO: add your code here.
     # Make use of compute_q_value to compute Q-values.
     # Return a pair of best action and its Q-value.
-    raise NotImplementedError
+    # Get all applicable actions
+    actions = inst.get_applicable_actions(s)
+    
+    # Compute Q-value for each action
+    action_values = [(action, compute_q_value(inst, s, action, values)) 
+                    for action in actions]
+    
+    # Find action with maximum Q-value
+    best_action, max_q_value = max(action_values, key=lambda x: x[1])
+    
+    return best_action, max_q_value
 
 
 """
@@ -54,12 +78,21 @@ Bellman equation for the given state-values (with discounted reward).
 returns:
     None
 """
-def bellman_update_in_place(values):
+def bellman_update_in_place(inst, values):
     # TODO: add your code here.
     # Make use of Python's random.choice to choose a random state.
     # Make use of compute_greedy_action_and_q_value to update
     # state-values with discount factor 0.9.
-    raise NotImplementedError
+    # Choose a random state
+    s = random.choice(inst.states)
+    
+    # Compute the new value using the Bellman equation
+    if s == inst.goal:
+        values[s] = 0.0
+    else:
+        # Get the maximum Q-value for this state
+        _, max_q_value = compute_greedy_action_and_q_value(inst, s, values)
+        values[s] = max_q_value
 
 
 """
@@ -98,7 +131,19 @@ def asynchronous_value_iteration(inst, num_iterations):
     # and the current state-values (again using print_values(...)).
     # Return the final state-values and a greedy policy computed
     # using the provided get_greedy_policy(inst, values).
-    raise NotImplementedError
+    # Initialize values
+    values = get_initial_values(inst)
+    
+    # Perform asynchronous updates
+    for i in range(num_iterations):
+        print(f"Iteration {i+1}:")
+        bellman_update_in_place(inst, values)
+        print_values(inst, values)
+    
+    # Compute the final greedy policy
+    policy = get_greedy_policy(inst, values)
+    
+    return values, policy
 
 
 if __name__ == "__main__":
