@@ -22,6 +22,8 @@ if __name__ == '__main__':
     if not os.path.exists('Results'):
         os.mkdir('Results')
     
+    """
+    
     sarsa = SARSA(
         name='SARSA',
         rng=env.np_random,
@@ -45,7 +47,7 @@ if __name__ == '__main__':
         epsilon_decay=True
     )
     sarsa_epsilon_decay.train(env)
-
+    """
     qlearning = QLearning(
         name="Q-Learning",
         rng=env.np_random,
@@ -58,7 +60,7 @@ if __name__ == '__main__':
     qlearning.train(env)
 
     # plot reward functions
-    plot_reward_functions(n_episodes, [sarsa, qlearning], 'fixed epsilon')
+    #plot_reward_functions(n_episodes, [sarsa, qlearning], 'fixed epsilon')
     plot_reward_functions(n_episodes, [sarsa, sarsa_epsilon_decay], 'epsilon decay')
 
     env.close()

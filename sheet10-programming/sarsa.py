@@ -25,13 +25,21 @@ class SARSA(RLAgent):
         Returns:
             None
         """
-        # TODO: implement Q-value update
-        raise NotImplementedError
+        # select action a′ in s′
 
+        # update if s′ was reached with a from s yielding r :
+        #   ^q(s, a) ← ^q(s, a) + α · (r + γ ^q(s′, a′) − ^q(s, a))
+
+        # TODO: implement Q-value update
+        td_target = r + gamma * self.q_values[s_prime][a_prime]
+        td_error = td_target - self.q_values[s][a]
+        self.q_values[s][a] += alpha * td_error
 
     def train(self, env):
         """"""
         print(f"Training {self.name}...")
+
+        np.random.seed(42)
         # training loop
         progress_bar = tqdm(np.arange(self.n_episodes+1))
         for episode in progress_bar:
@@ -45,21 +53,40 @@ class SARSA(RLAgent):
             is_terminal = False
             episode_reward = 0
 
+            
             # TODO: set epsilon for the current episode (hint: also condition on self.epsilon_decay)
             # in the last episode only, take only greedy actions
+            is_last_episode = episode == self.n_episodes
+
+            if self.epsilon_decay:
+                epsilon = 0.0 if is_last_episode else self.epsilon / self.n_episodes
+            else:
+                epsilon = 0.0 if is_last_episode else self.epsilon
+
+            #NOTE: Ignore epsilon decay, use epsilon-greedy for sampling (SARSA default)
+            action = get_epsilon_greedy_action(env.np_random, s, self.q_values, epsilon)
 
             # TODO: SARSA algorithm
-            raise NotImplementedError
-
             # take steps in the environment until a terminal state is reached
             while not is_terminal:
+
                 # TODO: SARSA algorithm (make sure to update is_terminal with the return from env.step(a))
-                raise NotImplementedError
+                next_state, r, terminated, truncated, _ = env.step(action)
+                is_terminal = terminated or truncated
+
+                if not is_terminal:
+                    next_action = get_epsilon_greedy_action(env.np_random, next_state, self.q_values, epsilon)
+
+                    self.update_q_value(
+                        s, action, next_state, next_action, r, self.alpha, self.gamma
+                    )
 
                 # TODO: update rewards for the current episode
-                # store some data
                 episode_reward += r
-            
+
+                s = next_state
+                action = next_action if not is_terminal else None
+                
             # TODO: nothing to do below this comment (leave code below unchanged)
             # store reward and render episode
             self.total_reward_per_episode[episode] = episode_reward
